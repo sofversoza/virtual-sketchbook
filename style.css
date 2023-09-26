@@ -1,0 +1,22 @@
+@import url('https://fonts.googleapis.com/css2?family=Edu+SA+Beginner:wght@400;500;600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  height: 100vh;
+  font-family: 'Edu SA Beginner', cursive;
+}
+
+.app-container {}
+
+
+#canvas {
+  background-color: pink;
+}
