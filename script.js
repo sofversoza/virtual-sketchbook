@@ -4,17 +4,20 @@ const sidebar = document.getElementById("sidebar")
 const sidebarIcon = document.getElementById("sidebar-icon")
 const tooltip = document.querySelector(".tooltip")
 const tooltipTriggers = document.querySelectorAll(".tooltip-trigger")
-const tools = document.querySelectorAll(".tools li.tool:not(.width)")
+const tools = document.querySelectorAll(".tools li.tool:not(.width):not(.fill)")
 const shapes = document.querySelectorAll(".shape")
 const colorPicker = document.querySelector("#s-color-picker")
 const colorOptions = document.querySelectorAll(".colors .color")
+const colorViewer = document.querySelector("#color-viewer")
 const lineWidthOptions = document.querySelectorAll("#line-width-options .width")
+const colorFillOptions = document.querySelectorAll("#color-fill .fill")
 const clearCanvas = document.querySelector(".clear-btn")
 const saveCanvas = document.querySelector(".save-btn")
 
 let startX, startY //mousedown x1,y1
 let isDrawing = false
 let sidebarOpen = true
+let fillColor = false
 let selectedTool
 let selectedColor
 let selectedWidth
@@ -42,12 +45,16 @@ function getBodyColor() {
 }
 
 const drawBox = (e) => {
-	return ctx.strokeRect(
-		e.offsetX,
-		e.offsetY,
-		startX - e.offsetX,
-		startY - e.offsetY
-	)
+	if (!fillColor) {
+		return ctx.strokeRect(
+			e.offsetX,
+			e.offsetY,
+			startX - e.offsetX,
+			startY - e.offsetY
+		)
+	}
+
+	ctx.fillRect(e.offsetX, e.offsetY, startX - e.offsetX, startY - e.offsetY)
 }
 
 const drawCircle = (e) => {
@@ -58,7 +65,7 @@ const drawCircle = (e) => {
 	)
 	//x1, y1, radius, start & end angle
 	ctx.arc(startX, startY, radius, 0, 2 * Math.PI)
-	ctx.stroke()
+	!fillColor ? ctx.stroke() : ctx.fill()
 }
 
 const drawTriangle = (e) => {
@@ -67,7 +74,7 @@ const drawTriangle = (e) => {
 	ctx.lineTo(e.offsetX, e.offsetY) //1st line to mouse pointer
 	ctx.lineTo(startX * 2 - e.offsetX, e.offsetY) //tri's bottom line
 	ctx.closePath() //auto draw 3rd line, closing the tri
-	ctx.stroke()
+	!fillColor ? ctx.stroke() : ctx.fill()
 }
 
 const startDraw = (e) => {
@@ -76,6 +83,7 @@ const startDraw = (e) => {
 	startY = e.offsetY
 	ctx.beginPath()
 	ctx.strokeStyle = selectedColor
+	ctx.fillStyle = selectedColor
 	ctx.lineWidth = selectedWidth
 	//copy canvas data into snapshot to stop weird dragging while drawing
 	snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height)
@@ -133,6 +141,16 @@ lineWidthOptions.forEach((width) => {
 	})
 })
 
+//color fill
+colorFillOptions.forEach((option) => {
+	option.addEventListener("click", () => {
+		document.querySelector("#color-fill .selected").classList.remove("selected")
+		option.classList.add("selected")
+		fillColor = option.id === "fill" ? true : false
+		console.log("fill color?" + " " + fillColor)
+	})
+})
+
 //change color
 colorOptions.forEach((color) => {
 	color.addEventListener("click", () => {
@@ -142,6 +160,7 @@ colorOptions.forEach((color) => {
 		selectedColor = window
 			.getComputedStyle(color)
 			.getPropertyValue("background-color")
+		colorViewer.style.backgroundColor = selectedColor
 		console.log(selectedColor)
 	})
 })
@@ -151,6 +170,7 @@ colorPicker.addEventListener("change", () => {
 	// passing picked color value from color picker to last color btn bg
 	colorPicker.parentElement.style.background = colorPicker.value
 	colorPicker.parentElement.click()
+	colorViewer.style.backgroundColor = colorPicker.value
 })
 
 //clear canvas

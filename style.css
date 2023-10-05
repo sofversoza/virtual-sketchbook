@@ -78,7 +78,7 @@ li {
   top: 0;
   left: 0;
   transition: left 0.3s ease-in-out;
-  background-color: rgba(245, 245, 245);
+  background-color: rgba(245, 245, 245, 0.804);
   box-shadow: 0px 7px 14px rgba(0, 0, 0, .08),
     0px 0px 3.12708px rgba(0, 0, 0, .0798),
     0px 0px .931014px rgba(0, 0, 0, .1702);
@@ -115,7 +115,7 @@ li {
   height: inherit;
   padding: 10px;
   display: flex;
-  gap: 3%;
+  gap: 10px;
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
@@ -123,7 +123,9 @@ li {
 }
 
 #tool-options,
-#line-width-options {
+#line-width-options,
+#color-options,
+#color-viewer {
   width: 100%;
   /* height: 100%; */
   align-self: flex-start;
@@ -137,17 +139,18 @@ li {
 }
 
 #tool-options li img {
-  width: 18px;
-  height: 18px;
+  width: 17px;
+  height: 17px;
   filter: invert(45%);
 }
 
 #tool-options li,
-#line-width-options li {
+#line-width-options li,
+#color-fill li {
   border-top: 3px solid #f9f7f7;
   border-left: 3px solid #f9f7f7;
-  border-right: 2px solid #cecece;
-  border-bottom: 1px solid #cecece;
+  border-right: 3px solid #cecece;
+  border-bottom: 3px solid #cecece;
   background-color: #e0e1e1;
   box-shadow: 0px 7px 14px rgba(0, 0, 0, .08),
     0px 0px 3.12708px rgba(0, 0, 0, .0798),
@@ -155,40 +158,82 @@ li {
 }
 
 #tool-options .tool:is(.active),
-#line-width-options .width:is(.selected) {
+#line-width-options .width:is(.selected),
+#color-fill .fill:is(.selected) {
   border-top: 3px solid #abaaaa;
   border-left: 3px solid #abaaaa;
-  border-right: 2px solid #f9f7f7;
-  border-bottom: 1px solid #f9f7f7;
+  border-right: 3px solid #f9f7f7;
+  border-bottom: 3px solid #f9f7f7;
   background-image: url("./assets/activebg.jpeg");
   background-size: cover;
 }
 
 #tool-options .tool:is(.active) img,
-#line-width-options .width:is(.selected) img {
+#line-width-options .width:is(.selected) img,
+#color-fill .fill:is(.selected) img {
   filter: invert(35%);
 }
 
-#line-width-options li {
-  padding: 2px 10px 0 10px;
-}
-
 #line-width-options li img {
-  width: 40px;
-  height: 25px;
+  width: 17px;
+  height: 17px;
   filter: invert(45%);
   transform: rotate(45deg);
 }
 
+#color-fill {
+  display: flex;
+  justify-content: center;
+}
 
+#color-fill ul {
+  display: flex;
+  align-items: center;
+}
 
+#color-fill li,
+#line-width-options li {
+  padding: 4px 5px 0 5px;
+}
 
+#color-fill li img {
+  width: 17px;
+  height: 17px;
+  filter: invert(45%);
+}
 
-#color-options .color {
+#color-viewer {
+  align-self: center;
+  width: 97%;
+  min-height: 25px;
+  background-color: "";
+  border-top: 2.5px solid #abaaaa;
+  border-left: 2.5px solid #abaaaa;
+  border-right: 2.5px solid #f9f7f7;
+  border-bottom: 2.5px solid #f9f7f7;
+  box-shadow: 0px 7px 14px rgba(0, 0, 0, .08),
+    0px 0px 3.12708px rgba(0, 0, 0, .0798),
+    0px 0px .931014px rgba(0, 0, 0, .1702);
+}
+
+#color-options li.color {
   height: 22px;
-  width: 22px;
-  border-radius: 50%;
+  width: 23px;
   position: relative;
+  border-top: 2.5px solid #abaaaa;
+  border-left: 2.5px solid #abaaaa;
+  border-right: 2.5px solid #f9f7f7;
+  border-bottom: 2.5px solid #f9f7f7;
+  box-shadow: 0px 7px 14px rgba(0, 0, 0, .08),
+    0px 0px 3.12708px rgba(0, 0, 0, .0798),
+    0px 0px .931014px rgba(0, 0, 0, .1702);
+}
+
+#color-options li.color:is(.selected) {
+  border-top: 3.5px solid #abaaaa;
+  border-left: 3.5px solid #abaaaa;
+  border-right: 3.5px solid #f9f7f7;
+  border-bottom: 3.5px solid #f9f7f7;
 }
 
 #color-options #s-color-picker {
@@ -196,8 +241,29 @@ li {
   position: relative;
 }
 
+/* circle 4 selected */
+#color-options .color.selected::before {
+  position: absolute;
+  content: "";
+  top: 50%;
+  left: 50%;
+  height: 5px;
+  width: 5px;
+  background-color: #fff;
+  border-radius: 50%;
+  border: 1px solid #fff;
+  transform: translate(-50%, -50%);
+}
+
 #color-options .color:nth-child(1) {
-  background: radial-gradient(at center, rgb(245, 247, 245), rgb(78, 127, 169));
+  background: linear-gradient(to right,
+      red,
+      orange,
+      yellow,
+      green,
+      blue,
+      indigo,
+      violet);
 }
 
 #color-options .color:nth-child(2) {
@@ -226,27 +292,6 @@ li {
 
 #color-options .color:nth-child(8) {
   background-color: #e78787;
-}
-
-#color-options .color.selected {
-  border: 1.5px solid #fff;
-}
-
-#color-options .color.selected::before {
-  position: absolute;
-  content: "";
-  top: 50%;
-  left: 50%;
-  height: 4px;
-  width: 4px;
-  background-color: #fff;
-  border-radius: inherit;
-  border: 1px solid #fff;
-  transform: translate(-50%, -50%);
-}
-
-#color-options .color:first-child.selected::before {
-  border-color: #fff;
 }
 
 .btn-wrapper button {

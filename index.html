@@ -82,7 +82,7 @@
 									<li class="tool" id="line">
 										<img src="assets/line.svg" alt="line tool" title="line" />
 									</li>
-									<li class="tool" id="shapes">
+									<li class="tool" id="square">
 										<img
 											src="assets/shapes.svg"
 											alt="shapes tool"
@@ -109,6 +109,8 @@
 										title="line width"
 									/>
 								</li>
+							</ul>
+							<ul class="widths">
 								<li class="tool width" id="pen-sz" data-line-width="8">
 									<img
 										src="assets/pen-sz-4.svg"
@@ -126,14 +128,66 @@
 							</ul>
 						</div>
 
+						<div id="color-fill">
+							<ul class="options">
+								<li class="tool fill selected" id="no-fill">
+									<img
+										src="assets/nofill.svg"
+										alt="fill color"
+										title="no fill color"
+									/>
+								</li>
+								<li class="tool fill" id="fill">
+									<img
+										src="assets/fill.svg"
+										alt="fill color"
+										title="fill color"
+									/>
+								</li>
+							</ul>
+						</div>
+
+						<div id="color-viewer" title="selected color"></div>
+
 						<div id="color-options">
-							<span class="title">Color Palette</span>
-							<div class="row1">
+							<div class="col-1">
 								<ul class="colors">
-									<li class="color">
+									<li class="color selected">
 										<input type="color" id="s-color-picker" value="#FFFFFF" />
 									</li>
-									<li class="color selected"></li>
+									<li class="color"></li>
+									<li class="color"></li>
+									<li class="color"></li>
+									<li class="color"></li>
+									<li class="color"></li>
+									<li class="color"></li>
+									<li class="color"></li>
+									<li class="color"></li>
+									<li class="color"></li>
+								</ul>
+							</div>
+
+							<div class="col-2">
+								<ul class="colors">
+									<li class="color"></li>
+									<li class="color"></li>
+									<li class="color"></li>
+									<li class="color"></li>
+									<li class="color"></li>
+									<li class="color"></li>
+									<li class="color"></li>
+									<li class="color"></li>
+									<li class="color"></li>
+									<li class="color"></li>
+								</ul>
+							</div>
+
+							<div class="col-3">
+								<ul class="colors">
+									<li class="color"></li>
+									<li class="color"></li>
+									<li class="color"></li>
+									<li class="color"></li>
 									<li class="color"></li>
 									<li class="color"></li>
 									<li class="color"></li>
@@ -144,9 +198,7 @@
 							</div>
 						</div>
 
-						<div class="settings">
-							<span class="title">Options</span>
-						</div>
+						<div class="settings"></div>
 					</div>
 				</div>
 			</section>
