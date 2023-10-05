@@ -8,105 +8,150 @@
 		<script src="script.js" defer></script>
 	</head>
 	<body>
-		<div id="app-container">
+		<main id="app-container">
 			<section>
 				<div id="sidebar">
-					<div class="toggle-sidebar">
-						<img src="assets/open.svg" alt="toggle sidebar" id="sidebar-icon" />
+					<div id="toggle-sidebar">
+						<img
+							src="assets/toggleicon.svg"
+							alt="icon for sidebar toggle"
+							id="sidebar-icon"
+						/>
 					</div>
-					<div class="tool-options left">
-						<label>Tools & Shapes</label>
-						<div class="row1">
-							<ul class="tools">
-								<li class="tool active" id="pointer">
-									<img src="assets/pointer.svg" alt="pointer tool" />
-									<span class="tooltip">Mouse</span>
-								</li>
-								<li class="tool" id="move">
-									<img src="assets/move.svg" alt="move tool" />
-									<span class="tooltip">Move</span>
-								</li>
-								<li class="tool" id="eraser">
-									<img src="assets/eraser.svg" alt="eraser tool" />
-									<span class="tooltip">Eraser</span>
-								</li>
-								<li class="tool" id="text">
-									<img src="assets/text.svg" alt="text tool" />
-									<span class="tooltip">Text</span>
-								</li>
-								<li class="tool shape" id="square">
-									<img src="assets/square.svg" alt="square tool" />
-									<span class="tooltip">Box</span>
-								</li>
-								<li class="tool shape" id="circle">
-									<img src="assets/circle.svg" alt="circle tool" />
-									<span class="tooltip">Circle</span>
-								</li>
-								<li class="tool shape" id="triangle">
-									<img src="assets/triangle.svg" alt="triangle tool" />
-									<span class="tooltip">Triangle</span>
-								</li>
-							</ul>
+
+					<div class="sidebar-wrapper">
+						<div id="tool-options">
+							<div class="col-1">
+								<ul class="tools">
+									<li class="tool active" id="pointer">
+										<img
+											src="assets/pointer.svg"
+											alt="pointer tool"
+											title="pointer"
+										/>
+									</li>
+									<li class="tool" id="pencil">
+										<img
+											src="assets/pencil.svg"
+											alt="pencil tool"
+											title="pencil"
+										/>
+									</li>
+									<li class="tool" id="text">
+										<img src="assets/text.svg" alt="text tool" title="text" />
+									</li>
+									<li class="tool" id="stamp">
+										<img
+											src="assets/stamp.svg"
+											alt="stamp tool"
+											title="stamp"
+										/>
+									</li>
+								</ul>
+							</div>
+
+							<!-- <li class="tool shape" id="square">
+										<img src="assets/square.svg" alt="square tool" />
+										<span class="tooltip">Box</span>
+									</li>
+									<li class="tool shape" id="circle">
+										<img src="assets/circle.svg" alt="circle tool" />
+										<span class="tooltip">Circle</span>
+									</li>
+									<li class="tool shape" id="triangle">
+										<img src="assets/triangle.svg" alt="triangle tool" />
+										<span class="tooltip">Triangle</span>
+									</li> -->
+
+							<div class="col-2">
+								<ul class="tools">
+									<li class="tool" id="eraser">
+										<img
+											src="assets/eraser.svg"
+											alt="eraser tool"
+											title="eraser"
+										/>
+									</li>
+									<li class="tool" id="brush">
+										<img
+											src="assets/brush.svg"
+											alt="brush tool"
+											title="brush"
+										/>
+									</li>
+									<li class="tool" id="line">
+										<img src="assets/line.svg" alt="line tool" title="line" />
+									</li>
+									<li class="tool" id="shapes">
+										<img
+											src="assets/shapes.svg"
+											alt="shapes tool"
+											title="shapes"
+										/>
+									</li>
+								</ul>
+							</div>
 						</div>
-						<div class="row2">
-							<ul class="tools">
-								<li class="tool" id="pencil">
-									<img src="assets/pencil.svg" alt="pencil tool" />
-									<span class="tooltip">Pencil</span>
-								</li>
-								<li class="tool" id="brush">
-									<img src="assets/brush.svg" alt="brush tool" />
-									<span class="tooltip">Brush</span>
-								</li>
+
+						<div id="line-width-options">
+							<ul class="widths">
 								<li class="tool width selected" id="pen-sz" data-line-width="1">
-									<img src="assets/pen-sz-1.svg" alt="stroke width" />
-									<span class="tooltip">Width #1</span>
-								</li>
-								<li class="tool width" id="pen-sz" data-line-width="3">
-									<img src="assets/pen-sz-2.svg" alt="stroke width" />
-									<span class="tooltip">Width #2</span>
+									<img
+										src="assets/pen-sz-1.svg"
+										alt="line width"
+										title="line width"
+									/>
 								</li>
 								<li class="tool width" id="pen-sz" data-line-width="5">
-									<img src="assets/pen-sz-3.svg" alt="stroke width" />
-									<span class="tooltip">Width #3</span>
+									<img
+										src="assets/pen-sz-3.svg"
+										alt="line width"
+										title="line width"
+									/>
 								</li>
 								<li class="tool width" id="pen-sz" data-line-width="8">
-									<img src="assets/pen-sz-4.svg" alt="stroke width" />
-									<span class="tooltip">Width #4</span>
+									<img
+										src="assets/pen-sz-4.svg"
+										alt="line width"
+										title="line width"
+									/>
 								</li>
-								<li class="tool width" id="pen-sz" data-line-width="12">
-									<img src="assets/pen-sz-5.svg" alt="stroke width" />
-									<span class="tooltip">Width #5</span>
+								<li class="tool width" id="pen-sz" data-line-width="15">
+									<img
+										src="assets/pen-sz-5.svg"
+										alt="line width"
+										title="line width"
+									/>
 								</li>
 							</ul>
 						</div>
-					</div>
 
-					<div class="tool-options middle">
-						<label>Color Palette</label>
-						<div class="row1">
-							<ul class="colors">
-								<li class="color">
-									<input type="color" id="s-color-picker" value="#FFFFFF" />
-								</li>
-								<li class="color selected"></li>
-								<li class="color"></li>
-								<li class="color"></li>
-								<li class="color"></li>
-								<li class="color"></li>
-								<li class="color"></li>
-								<li class="color"></li>
-							</ul>
+						<div id="color-options">
+							<span class="title">Color Palette</span>
+							<div class="row1">
+								<ul class="colors">
+									<li class="color">
+										<input type="color" id="s-color-picker" value="#FFFFFF" />
+									</li>
+									<li class="color selected"></li>
+									<li class="color"></li>
+									<li class="color"></li>
+									<li class="color"></li>
+									<li class="color"></li>
+									<li class="color"></li>
+									<li class="color"></li>
+								</ul>
+							</div>
 						</div>
-					</div>
 
-					<div class="tool-options right">
-						<label>Options</label>
+						<div class="settings">
+							<span class="title">Options</span>
+						</div>
 					</div>
 				</div>
 			</section>
 
-			<section class="sketch-board">
+			<section>
 				<canvas id="canvas"></canvas>
 			</section>
 
@@ -116,6 +161,6 @@
 					<button class="save-btn">Download image</button>
 				</div>
 			</section> -->
-		</div>
+		</main>
 	</body>
 </html>

@@ -2,39 +2,28 @@ const canvas = document.querySelector("#canvas")
 const ctx = canvas.getContext("2d")
 const sidebar = document.getElementById("sidebar")
 const sidebarIcon = document.getElementById("sidebar-icon")
+const tooltip = document.querySelector(".tooltip")
+const tooltipTriggers = document.querySelectorAll(".tooltip-trigger")
 const tools = document.querySelectorAll(".tools li.tool:not(.width)")
 const shapes = document.querySelectorAll(".shape")
 const colorPicker = document.querySelector("#s-color-picker")
 const colorOptions = document.querySelectorAll(".colors .color")
-const lineWidthOptions = document.querySelectorAll(".tools .width")
+const lineWidthOptions = document.querySelectorAll("#line-width-options .width")
 const clearCanvas = document.querySelector(".clear-btn")
 const saveCanvas = document.querySelector(".save-btn")
 
-let prevMouseX, prevMouseY //mousedown x1,y1
+let startX, startY //mousedown x1,y1
 let isDrawing = false
-let sidebarClosed = true
+let sidebarOpen = true
 let selectedTool
 let selectedColor
 let selectedWidth
+let bodyColor
 let snapshot
 
 window.addEventListener("load", () => {
-	canvas.width = canvas.offsetWidth
-	canvas.height = canvas.offsetHeight
-})
-
-sidebarIcon.addEventListener("click", () => {
-	if (sidebarClosed) {
-		sidebarClosed = false
-		sidebar.style.left = "0"
-		sidebarIcon.style.transform = "rotate(180deg)"
-	} else {
-		sidebarClosed = true
-		sidebar.style.left = "-13vw"
-		sidebarIcon.style.transform = "rotate(0deg)"
-	}
-
-	console.log("clicked icon")
+	canvas.width = window.innerWidth
+	canvas.height = window.innerHeight
 })
 
 function fillShape() {
@@ -46,22 +35,18 @@ function fillShape() {
 	})
 }
 
-tools.forEach((tool) => {
-	tool.addEventListener("click", () => {
-		document.querySelector(".tools .active").classList.remove("active")
-		tool.classList.add("active")
-		selectedTool = tool.id
-		console.log(selectedTool)
-		fillShape()
-	})
-})
+function getBodyColor() {
+	const body = document.body
+	const computedStyle = getComputedStyle(body)
+	return (bodyColor = computedStyle.backgroundColor)
+}
 
 const drawBox = (e) => {
 	return ctx.strokeRect(
 		e.offsetX,
 		e.offsetY,
-		prevMouseX - e.offsetX,
-		prevMouseY - e.offsetY
+		startX - e.offsetX,
+		startY - e.offsetY
 	)
 }
 
@@ -69,26 +54,26 @@ const drawCircle = (e) => {
 	ctx.beginPath()
 	//radius of circle according to mouse pointer
 	let radius = Math.sqrt(
-		Math.pow(prevMouseX - e.offsetX, 2) + Math.pow(prevMouseY - e.offsetY, 2)
+		Math.pow(startX - e.offsetX, 2) + Math.pow(startY - e.offsetY, 2)
 	)
 	//x1, y1, radius, start & end angle
-	ctx.arc(prevMouseX, prevMouseY, radius, 0, 2 * Math.PI)
+	ctx.arc(startX, startY, radius, 0, 2 * Math.PI)
 	ctx.stroke()
 }
 
 const drawTriangle = (e) => {
 	ctx.beginPath()
-	ctx.moveTo(prevMouseX, prevMouseY) //move tri to mouse pointer
+	ctx.moveTo(startX, startY) //move tri to mouse pointer
 	ctx.lineTo(e.offsetX, e.offsetY) //1st line to mouse pointer
-	ctx.lineTo(prevMouseX * 2 - e.offsetX, e.offsetY) //tri's bottom line
+	ctx.lineTo(startX * 2 - e.offsetX, e.offsetY) //tri's bottom line
 	ctx.closePath() //auto draw 3rd line, closing the tri
 	ctx.stroke()
 }
 
 const startDraw = (e) => {
 	isDrawing = true
-	prevMouseX = e.offsetX //passing current mouseX/Y pos as prev mouseX/Y values
-	prevMouseY = e.offsetY
+	startX = e.offsetX //passing current mouseX/Y pos as startX/Y values
+	startY = e.offsetY
 	ctx.beginPath()
 	ctx.strokeStyle = selectedColor
 	ctx.lineWidth = selectedWidth
@@ -101,7 +86,7 @@ const drawing = (e) => {
 	ctx.putImageData(snapshot, 0, 0) //adding copied canvas data onto this canvas
 
 	if (selectedTool === "pencil" || selectedTool === "eraser") {
-		ctx.strokeStyle = selectedTool === "eraser" ? "#fff" : selectedColor
+		ctx.strokeStyle = selectedTool === "eraser" ? getBodyColor() : selectedColor
 		ctx.lineTo(e.offsetX, e.offsetY) //creating line according to mouse pointer
 		ctx.stroke() //drawing/filling line with color
 	} else if (selectedTool === "square") {
@@ -113,10 +98,35 @@ const drawing = (e) => {
 	}
 }
 
+tools.forEach((tool) => {
+	tool.addEventListener("click", () => {
+		document.querySelector(".tools .active").classList.remove("active")
+		tool.classList.add("active")
+		selectedTool = tool.id
+		console.log(selectedTool)
+		fillShape()
+	})
+})
+
+//toggle sidebar
+sidebarIcon.addEventListener("click", () => {
+	if (sidebarOpen) {
+		sidebar.style.left = "-90px"
+		sidebarIcon.style.transform = "rotate(0deg)"
+		sidebarOpen = false
+	} else {
+		sidebar.style.left = "0"
+		sidebarIcon.style.transform = "rotate(180deg)"
+		sidebarOpen = true
+	}
+})
+
 //change line width
 lineWidthOptions.forEach((width) => {
 	width.addEventListener("click", () => {
-		document.querySelector(".tools .selected").classList.remove("selected")
+		document
+			.querySelector("#line-width-options .selected")
+			.classList.remove("selected")
 		width.classList.add("selected")
 		selectedWidth = parseFloat(width.getAttribute("data-line-width"))
 		console.log(selectedWidth)
