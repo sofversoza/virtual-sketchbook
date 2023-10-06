@@ -29,7 +29,7 @@ span {
 body {
   color: var(--clr-gray);
   font-family: 'Noto Sans JP', sans-serif;
-  background-color: #E5D6C8;
+  background-color: #3E3E3F;
 }
 
 ul {
@@ -48,22 +48,6 @@ li {
   align-items: center;
 }
 
-.tooltip {
-  z-index: 1000;
-  display: none;
-  position: absolute;
-  background-color: #9a9999;
-  font-size: 10px;
-  color: #fff;
-  padding: 1.5px 3px;
-  border-radius: 3px;
-}
-
-.tooltip-trigger {
-  position: relative;
-  display: inline-block;
-}
-
 #canvas {
   background-color: transparent;
 }
@@ -78,17 +62,10 @@ li {
   top: 0;
   left: 0;
   transition: left 0.3s ease-in-out;
-  background-color: rgba(245, 245, 245, 0.804);
+  background-color: #e0e1e1;
   box-shadow: 0px 7px 14px rgba(0, 0, 0, .08),
     0px 0px 3.12708px rgba(0, 0, 0, .0798),
     0px 0px .931014px rgba(0, 0, 0, .1702);
-}
-
-#sidebar .title {
-  color: var(--clr-gray200);
-  font-size: 0.7rem;
-  margin-top: -10px;
-  margin-bottom: 5px;
 }
 
 #toggle-sidebar {
@@ -98,7 +75,7 @@ li {
   justify-content: center;
   bottom: 50%;
   left: var(--sidebar-width);
-  padding: 3px 2px 3px 1px;
+  padding: 1px 2px 3px 0;
   background-color: rgba(245, 245, 245);
 }
 
@@ -112,23 +89,23 @@ li {
 }
 
 .sidebar-wrapper {
-  height: inherit;
-  padding: 10px;
+  height: 100%;
+  padding: 15px 10px;
   display: flex;
   gap: 10px;
   flex-direction: column;
   justify-content: flex-start;
-  align-items: center;
+  /* align-items: center; */
   overflow-y: auto;
+  border-right: 3px solid #abaaaa;
+  border-top: 3px solid #f9f7f7;
+  border-bottom: 4px solid #abaaaa;
 }
 
 #tool-options,
 #line-width-options,
 #color-options,
 #color-viewer {
-  width: 100%;
-  /* height: 100%; */
-  align-self: flex-start;
   display: flex;
   justify-content: center;
   /* border: 2px solid green; */
@@ -146,7 +123,8 @@ li {
 
 #tool-options li,
 #line-width-options li,
-#color-fill li {
+#color-fill li,
+#toggle-sidebar {
   border-top: 3px solid #f9f7f7;
   border-left: 3px solid #f9f7f7;
   border-right: 3px solid #cecece;
@@ -170,7 +148,8 @@ li {
 
 #tool-options .tool:is(.active) img,
 #line-width-options .width:is(.selected) img,
-#color-fill .fill:is(.selected) img {
+#color-fill .fill:is(.selected) img,
+#bottom-options button:is(.active) img {
   filter: invert(35%);
 }
 
@@ -181,14 +160,9 @@ li {
   transform: rotate(45deg);
 }
 
-#color-fill {
-  display: flex;
-  justify-content: center;
-}
-
 #color-fill ul {
   display: flex;
-  align-items: center;
+  justify-content: center;
 }
 
 #color-fill li,
@@ -204,7 +178,7 @@ li {
 
 #color-viewer {
   align-self: center;
-  width: 97%;
+  width: 96%;
   min-height: 25px;
   background-color: "";
   border-top: 2.5px solid #abaaaa;
@@ -218,7 +192,7 @@ li {
 
 #color-options li.color {
   height: 22px;
-  width: 23px;
+  width: 22px;
   position: relative;
   border-top: 2.5px solid #abaaaa;
   border-left: 2.5px solid #abaaaa;
@@ -255,7 +229,7 @@ li {
   transform: translate(-50%, -50%);
 }
 
-#color-options .color:nth-child(1) {
+#color-options #rainbow {
   background: linear-gradient(to right,
       red,
       orange,
@@ -266,43 +240,76 @@ li {
       violet);
 }
 
-#color-options .color:nth-child(2) {
-  background-color: #232222;
+#color-options #white {
+  background-color: #ffffff;
 }
 
-#color-options .color:nth-child(3) {
-  background-color: #be3636;
+#color-options #black {
+  background-color: #252525;
 }
 
-#color-options .color:nth-child(4) {
-  background-color: #468305;
+#bottom-options {
+  /* push to the bottom */
+  margin-top: auto;
 }
 
-#color-options .color:nth-child(5) {
-  background-color: #4163ca;
+#bottom-options .dark-mode,
+#bottom-options .redo-undo,
+#bottom-options .clear-save {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-#color-options .color:nth-child(6) {
-  background-color: #7727b8;
+#bottom-options .dark-mode,
+#bottom-options .redo-undo {
+  margin-bottom: 10px;
 }
 
-#color-options .color:nth-child(7) {
-  background-color: #ee9ed1;
+#bottom-options .clear-save {
+  flex-direction: column;
 }
 
-#color-options .color:nth-child(8) {
-  background-color: #e78787;
-}
-
-.btn-wrapper button {
+#bottom-options button {
+  width: 100%;
   cursor: pointer;
-  /* color: #fff; */
-  padding: 5px 10px;
-  border: none;
-  border-radius: 5px;
-  background-color: orange;
-  /* background-color: var(--clr-gray); */
+  color: var(--clr-gray200);
+  border-top: 3px solid #f9f7f7;
+  border-left: 3px solid #f9f7f7;
+  border-right: 3px solid #cecece;
+  border-bottom: 3px solid #cecece;
+  background-color: #e0e1e1;
   box-shadow: 0px 7px 14px rgba(0, 0, 0, .08),
     0px 0px 3.12708px rgba(0, 0, 0, .0798),
     0px 0px .931014px rgba(0, 0, 0, .1702);
+}
+
+#bottom-options button:is(.clicked, .active) {
+  border-top: 3px solid #abaaaa;
+  border-left: 3px solid #abaaaa;
+  border-right: 3px solid #f9f7f7;
+  border-bottom: 3px solid #f9f7f7;
+}
+
+#bottom-options button:is(.active) {
+  background-image: url("./assets/activebg.jpeg");
+  background-size: cover;
+}
+
+#bottom-options .clear-save button {
+  padding: 5px 2px 7px 2px;
+  font-size: 11px;
+  border-width: 3px;
+}
+
+#bottom-options .dark-mode button,
+#bottom-options .redo-undo button {
+  padding: 3px 2px 0 2px;
+}
+
+#bottom-options .dark-mode img,
+#bottom-options .redo-undo img {
+  width: 100%;
+  height: 20px;
+  filter: invert(45%);
 }

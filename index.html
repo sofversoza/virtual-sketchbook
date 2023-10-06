@@ -152,7 +152,7 @@
 						<div id="color-options">
 							<div class="col-1">
 								<ul class="colors">
-									<li class="color selected">
+									<li class="color" id="rainbow">
 										<input type="color" id="s-color-picker" value="#FFFFFF" />
 									</li>
 									<li class="color"></li>
@@ -169,7 +169,8 @@
 
 							<div class="col-2">
 								<ul class="colors">
-									<li class="color"></li>
+									<li class="color selected" id="black"></li>
+
 									<li class="color"></li>
 									<li class="color"></li>
 									<li class="color"></li>
@@ -184,7 +185,7 @@
 
 							<div class="col-3">
 								<ul class="colors">
-									<li class="color"></li>
+									<li class="color" id="white"></li>
 									<li class="color"></li>
 									<li class="color"></li>
 									<li class="color"></li>
@@ -198,7 +199,46 @@
 							</div>
 						</div>
 
-						<div class="settings"></div>
+						<div id="bottom-options">
+							<div class="dark-mode">
+								<button class="active" id="on">
+									<img
+										src="assets/dark_mode_on.svg"
+										alt="dark mode on button"
+										title="dark mode on"
+									/>
+								</button>
+								<button id="off">
+									<img
+										src="assets/dark_mode_off.svg"
+										alt="dark mode off button"
+										title="dark mode off"
+									/>
+								</button>
+							</div>
+
+							<div class="redo-undo">
+								<button id="undo">
+									<img
+										src="assets/undo.svg"
+										alt="undo button"
+										title="undo changes"
+									/>
+								</button>
+								<button id="redo">
+									<img
+										src="assets/redo.svg"
+										alt="redo button"
+										title="redo changes"
+									/>
+								</button>
+							</div>
+
+							<div class="clear-save">
+								<button class="clear-btn" title="clear canvas">Reset</button>
+								<button class="save-btn" title="download img">Save</button>
+							</div>
+						</div>
 					</div>
 				</div>
 			</section>
@@ -206,13 +246,6 @@
 			<section>
 				<canvas id="canvas"></canvas>
 			</section>
-
-			<!-- <section id="bottom-toolbar">
-				<div class="btn-wrapper">
-					<button class="clear-btn">Clear canvas</button>
-					<button class="save-btn">Download image</button>
-				</div>
-			</section> -->
 		</main>
 	</body>
 </html>

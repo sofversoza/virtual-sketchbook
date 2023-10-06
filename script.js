@@ -1,16 +1,20 @@
+const body = document.body
 const canvas = document.querySelector("#canvas")
 const ctx = canvas.getContext("2d")
 const sidebar = document.getElementById("sidebar")
 const sidebarIcon = document.getElementById("sidebar-icon")
-const tooltip = document.querySelector(".tooltip")
-const tooltipTriggers = document.querySelectorAll(".tooltip-trigger")
 const tools = document.querySelectorAll(".tools li.tool:not(.width):not(.fill)")
 const shapes = document.querySelectorAll(".shape")
 const colorPicker = document.querySelector("#s-color-picker")
 const colorOptions = document.querySelectorAll(".colors .color")
+const colorPalette1 = document.querySelectorAll(".col-1 .color:not(#rainbow)")
+const colorPalette2 = document.querySelectorAll(".col-2 .color:not(#black)")
+const colorPalette3 = document.querySelectorAll(".col-3 .color:not(#white)")
 const colorViewer = document.querySelector("#color-viewer")
 const lineWidthOptions = document.querySelectorAll("#line-width-options .width")
 const colorFillOptions = document.querySelectorAll("#color-fill .fill")
+const darkModeBtns = document.querySelectorAll(".dark-mode button")
+const redoUndoBtns = document.querySelectorAll(".redo-undo button")
 const clearCanvas = document.querySelector(".clear-btn")
 const saveCanvas = document.querySelector(".save-btn")
 
@@ -18,10 +22,10 @@ let startX, startY //mousedown x1,y1
 let isDrawing = false
 let sidebarOpen = true
 let fillColor = false
+let darkmode
 let selectedTool
 let selectedColor
 let selectedWidth
-let bodyColor
 let snapshot
 
 window.addEventListener("load", () => {
@@ -38,8 +42,9 @@ function fillShape() {
 	})
 }
 
+//for eraser tool
 function getBodyColor() {
-	const body = document.body
+	let bodyColor
 	const computedStyle = getComputedStyle(body)
 	return (bodyColor = computedStyle.backgroundColor)
 }
@@ -151,12 +156,58 @@ colorFillOptions.forEach((option) => {
 	})
 })
 
+//color palettes
+colorPalette1.forEach((icon, i) => {
+	const col1_colors = [
+		"#831A0C",
+		"#2C4F9A",
+		"#065b26",
+		"#ECEA7A",
+		"#b8591d",
+		"#983572",
+		"#603E83",
+		"#543623",
+		"#474747",
+	]
+	const color = col1_colors[i]
+	icon.style.backgroundColor = color
+})
+colorPalette2.forEach((icon, i) => {
+	const col2_colors = [
+		"#954545",
+		"#617BB3",
+		"#4A8560",
+		"#F1EF9B",
+		"#D37D47",
+		"#C171A3",
+		"#82669F",
+		"#7A5E4B",
+		"#8F8E8E",
+	]
+	const color = col2_colors[i]
+	icon.style.backgroundColor = color
+})
+colorPalette3.forEach((icon, i) => {
+	const col3_colors = [
+		"#C57D7D",
+		"#7587BC",
+		"#A5C2B0",
+		"#EFEDB2",
+		"#E4AE8C",
+		"#DEB0CC",
+		"#A692BA",
+		"#937B6C",
+		"#C7C7C7",
+	]
+	const color = col3_colors[i]
+	icon.style.backgroundColor = color
+})
+
 //change color
 colorOptions.forEach((color) => {
 	color.addEventListener("click", () => {
 		document.querySelector(".colors .selected").classList.remove("selected")
 		color.classList.add("selected")
-		// passing selected btn background-color as selectedColor value
 		selectedColor = window
 			.getComputedStyle(color)
 			.getPropertyValue("background-color")
@@ -173,18 +224,64 @@ colorPicker.addEventListener("change", () => {
 	colorViewer.style.backgroundColor = colorPicker.value
 })
 
+//dark mode
+darkModeBtns.forEach((btn) => {
+	btn.addEventListener("click", () => {
+		document.querySelector(".dark-mode .active").classList.remove("active")
+		btn.classList.add("active")
+		btn.id === "off"
+			? (body.style.backgroundColor = "#D3D8DB")
+			: (body.style.backgroundColor = "#3E3E3F")
+		getBodyColor()
+	})
+})
+
+//redo&undo
+redoUndoBtns.forEach((btn) => {
+	btn.addEventListener("mousedown", () => {
+		btn.id === "undo"
+			? (btn.classList.add("clicked"), console.log("clicked down: undo btn"))
+			: (btn.classList.add("clicked"), console.log("clicked down: redo btn"))
+	})
+	btn.addEventListener("click", () => {
+		btn.id === "undo"
+			? console.log("~undo changes~")
+			: console.log("~redo changes~")
+	})
+	btn.addEventListener("mouseup", () => {
+		btn.id === "undo"
+			? (btn.classList.remove("clicked"), console.log("un clicked: undo btn"))
+			: (btn.classList.remove("clicked"), console.log("un clicked: redo btn"))
+	})
+})
+
 //clear canvas
-// clearCanvas.addEventListener("click", () => {
-// 	ctx.clearRect(0, 0, canvas.width, canvas.height)
-// })
+clearCanvas.addEventListener("mousedown", () => {
+	clearCanvas.classList.add("clicked")
+	console.log("clicked down")
+})
+clearCanvas.addEventListener("click", () => {
+	ctx.clearRect(0, 0, canvas.width, canvas.height)
+	console.log("cleared canvas")
+})
+clearCanvas.addEventListener("mouseup", () => {
+	clearCanvas.classList.remove("clicked")
+	console.log("un clicked")
+})
 
 //save canvas
-// saveCanvas.addEventListener("click", () => {
-// 	const link = document.createElement("a") //create link element
-// 	link.download = `${Date.now()}.jpg` //current date as link download value
-// 	link.href = canvas.toDataURL() //toDataURL:data url of img. canvasData=href
-// 	link.click() //clicking link to download image
-// })
+saveCanvas.addEventListener("mousedown", () => {
+	saveCanvas.classList.add("clicked")
+})
+saveCanvas.addEventListener("click", () => {
+	const link = document.createElement("a") //create link element
+	link.download = `${Date.now()}.jpg` //current date as link download value
+	link.href = canvas.toDataURL() //toDataURL:data url of img. canvasData=href
+	link.click() //clicking link to download image
+})
+saveCanvas.addEventListener("mouseup", () => {
+	saveCanvas.classList.remove("clicked")
+})
 
 canvas.addEventListener("mousedown", startDraw)
 canvas.addEventListener("mousemove", drawing)
