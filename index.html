@@ -9,6 +9,22 @@
 	</head>
 	<body>
 		<main id="app-container">
+			<div id="main-modal">
+				<div class="modal-content">
+					<div class="warning">
+						<img src="assets/warning.svg" alt="warning icon" />
+					</div>
+					<h2 id="title"></h2>
+					<p id="prompt"></p>
+					<div class="btns">
+						<button id="go">Yes</button>
+						<button id="cancel">Cancel</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- #tool-modal -->
+
 			<section>
 				<div id="sidebar">
 					<div id="toggle-sidebar">
@@ -50,19 +66,6 @@
 								</ul>
 							</div>
 
-							<!-- <li class="tool shape" id="square">
-										<img src="assets/square.svg" alt="square tool" />
-										<span class="tooltip">Box</span>
-									</li>
-									<li class="tool shape" id="circle">
-										<img src="assets/circle.svg" alt="circle tool" />
-										<span class="tooltip">Circle</span>
-									</li>
-									<li class="tool shape" id="triangle">
-										<img src="assets/triangle.svg" alt="triangle tool" />
-										<span class="tooltip">Triangle</span>
-									</li> -->
-
 							<div class="col-2">
 								<ul class="tools">
 									<li class="tool" id="eraser">
@@ -82,13 +85,26 @@
 									<li class="tool" id="line">
 										<img src="assets/line.svg" alt="line tool" title="line" />
 									</li>
-									<li class="tool" id="square">
+									<li class="tool" id="shapes">
 										<img
 											src="assets/shapes.svg"
 											alt="shapes tool"
 											title="shapes"
 										/>
 									</li>
+									<div id="shapes-modal">
+										<ul class="shapes">
+											<li class="tool shape" id="square">
+												<img src="assets/square.svg" alt="square tool" />
+											</li>
+											<li class="tool shape" id="circle">
+												<img src="assets/circle.svg" alt="circle tool" />
+											</li>
+											<li class="tool shape" id="triangle">
+												<img src="assets/triangle.svg" alt="triangle tool" />
+											</li>
+										</ul>
+									</div>
 								</ul>
 							</div>
 						</div>

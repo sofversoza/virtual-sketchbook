@@ -3,7 +3,9 @@ const canvas = document.querySelector("#canvas")
 const ctx = canvas.getContext("2d")
 const sidebar = document.getElementById("sidebar")
 const sidebarIcon = document.getElementById("sidebar-icon")
+const modal = document.getElementById("shapes-modal")
 const tools = document.querySelectorAll(".tools li.tool:not(.width):not(.fill)")
+const shapeTool = document.getElementById(".tools #shapes")
 const shapes = document.querySelectorAll(".shape")
 const colorPicker = document.querySelector("#s-color-picker")
 const colorOptions = document.querySelectorAll(".colors .color")
@@ -22,6 +24,7 @@ let startX, startY //mousedown x1,y1
 let isDrawing = false
 let sidebarOpen = true
 let fillColor = false
+let shapesModalOpen = false
 let darkmode
 let selectedTool
 let selectedColor
@@ -33,6 +36,48 @@ window.addEventListener("load", () => {
 	canvas.height = window.innerHeight
 })
 
+function openMainModal(action) {
+	const mainModal = document.getElementById("main-modal")
+	const modalTitle = mainModal.querySelector("#title")
+	const modalPrompt = mainModal.querySelector("#prompt")
+	const modalGoBtn = mainModal.querySelector("#go")
+	const modalCancelBtn = mainModal.querySelector("#cancel")
+	let canvasData //store canvas img data before clearing it
+
+	modalGoBtn.addEventListener("click", () => {
+		if (action === "reset") {
+			ctx.clearRect(0, 0, canvas.width, canvas.height)
+		} else if (action === "download") {
+			const link = document.createElement("a")
+			link.download = `${Date.now()}.jpg` //current date as link download value
+			link.href = canvasData //canvas.toDataURL()
+			link.click() //simulate the click on link to trigger download
+		}
+		mainModal.style.display = "none"
+	})
+
+	modalCancelBtn.addEventListener("click", () => {
+		mainModal.style.display = "none"
+	})
+
+	switch (action) {
+		case "reset":
+			modalTitle.textContent = "Clear Canvas"
+			modalPrompt.textContent =
+				"Are you sure you want to reset the whole canvas? This can't be undone"
+			break
+		case "download":
+			modalTitle.textContent = "Download"
+			modalPrompt.textContent =
+				"Save canvas as it is and download as image? (.jpg)"
+			canvasData = canvas.toDataURL() //toDataURL:data url of img. canvasData=href
+			break
+	}
+
+	mainModal.style.display = "block"
+}
+
+//for filling shapes when active
 function fillShape() {
 	shapes.forEach((shape) => {
 		const shapeImg = shape.querySelector("img")
@@ -44,9 +89,9 @@ function fillShape() {
 
 //for eraser tool
 function getBodyColor() {
-	let bodyColor
 	const computedStyle = getComputedStyle(body)
-	return (bodyColor = computedStyle.backgroundColor)
+	let bodyColor = computedStyle.backgroundColor
+	return bodyColor
 }
 
 const drawBox = (e) => {
@@ -58,7 +103,6 @@ const drawBox = (e) => {
 			startY - e.offsetY
 		)
 	}
-
 	ctx.fillRect(e.offsetX, e.offsetY, startX - e.offsetX, startY - e.offsetY)
 }
 
@@ -75,11 +119,18 @@ const drawCircle = (e) => {
 
 const drawTriangle = (e) => {
 	ctx.beginPath()
-	ctx.moveTo(startX, startY) //move tri to mouse pointer
-	ctx.lineTo(e.offsetX, e.offsetY) //1st line to mouse pointer
+	ctx.moveTo(startX, startY)
+	ctx.lineTo(e.offsetX, e.offsetY)
 	ctx.lineTo(startX * 2 - e.offsetX, e.offsetY) //tri's bottom line
 	ctx.closePath() //auto draw 3rd line, closing the tri
 	!fillColor ? ctx.stroke() : ctx.fill()
+}
+
+const drawLine = (e) => {
+	ctx.beginPath()
+	ctx.moveTo(startX, startY)
+	ctx.lineTo(e.offsetX, e.offsetY)
+	ctx.stroke()
 }
 
 const startDraw = (e) => {
@@ -98,22 +149,48 @@ const drawing = (e) => {
 	if (!isDrawing) return
 	ctx.putImageData(snapshot, 0, 0) //adding copied canvas data onto this canvas
 
-	if (selectedTool === "pencil" || selectedTool === "eraser") {
-		ctx.strokeStyle = selectedTool === "eraser" ? getBodyColor() : selectedColor
-		ctx.lineTo(e.offsetX, e.offsetY) //creating line according to mouse pointer
-		ctx.stroke() //drawing/filling line with color
-	} else if (selectedTool === "square") {
-		drawBox(e)
-	} else if (selectedTool === "circle") {
-		drawCircle(e)
+	switch (selectedTool) {
+		case "pencil":
+		case "eraser":
+			ctx.strokeStyle =
+				selectedTool === "eraser" ? getBodyColor() : selectedColor
+			ctx.lineTo(e.offsetX, e.offsetY) //creating line according to mouse pointer
+			ctx.stroke() //drawing/filling line with color
+			break
+		case "line":
+			drawLine(e)
+			break
+		case "square":
+			drawBox(e)
+			break
+		case "circle":
+			drawCircle(e)
+			break
+		case "triangle":
+			drawTriangle(e)
+			break
+		// default:
+		// 	drawTriangle(e)
+	}
+}
+
+function shapeOptionsModal(tool, e) {
+	if (!shapesModalOpen) {
+		modal.style.display = "block"
+		modal.style.left = e.clientX + 25 + "px"
+		modal.style.top = e.clientY + "px"
 	} else {
-		drawTriangle(e)
+		modal.style.display = "none"
 	}
 }
 
 tools.forEach((tool) => {
-	tool.addEventListener("click", () => {
+	tool.addEventListener("click", (e) => {
 		document.querySelector(".tools .active").classList.remove("active")
+
+		tool.id === "shapes" &&
+			(shapeOptionsModal(tool, e), (shapesModalOpen = true))
+
 		tool.classList.add("active")
 		selectedTool = tool.id
 		console.log(selectedTool)
@@ -229,29 +306,25 @@ darkModeBtns.forEach((btn) => {
 	btn.addEventListener("click", () => {
 		document.querySelector(".dark-mode .active").classList.remove("active")
 		btn.classList.add("active")
-		btn.id === "off"
-			? (body.style.backgroundColor = "#D3D8DB")
-			: (body.style.backgroundColor = "#3E3E3F")
+		body.style.backgroundColor = btn.id === "off" ? "#D3D8DB" : "#3E3E3F"
 		getBodyColor()
 	})
 })
 
-//redo&undo
+//redo & undo
 redoUndoBtns.forEach((btn) => {
 	btn.addEventListener("mousedown", () => {
-		btn.id === "undo"
-			? (btn.classList.add("clicked"), console.log("clicked down: undo btn"))
-			: (btn.classList.add("clicked"), console.log("clicked down: redo btn"))
+		btn.classList.add("clicked")
+		console.log(`clicked down: ${btn.id} btn`)
 	})
+
 	btn.addEventListener("click", () => {
-		btn.id === "undo"
-			? console.log("~undo changes~")
-			: console.log("~redo changes~")
+		console.log(`~${btn.id} changes~`)
 	})
+
 	btn.addEventListener("mouseup", () => {
-		btn.id === "undo"
-			? (btn.classList.remove("clicked"), console.log("un clicked: undo btn"))
-			: (btn.classList.remove("clicked"), console.log("un clicked: redo btn"))
+		btn.classList.remove("clicked")
+		console.log(`un clicked: ${btn.id} btn`)
 	})
 })
 
@@ -261,8 +334,7 @@ clearCanvas.addEventListener("mousedown", () => {
 	console.log("clicked down")
 })
 clearCanvas.addEventListener("click", () => {
-	ctx.clearRect(0, 0, canvas.width, canvas.height)
-	console.log("cleared canvas")
+	openMainModal("reset")
 })
 clearCanvas.addEventListener("mouseup", () => {
 	clearCanvas.classList.remove("clicked")
@@ -274,10 +346,7 @@ saveCanvas.addEventListener("mousedown", () => {
 	saveCanvas.classList.add("clicked")
 })
 saveCanvas.addEventListener("click", () => {
-	const link = document.createElement("a") //create link element
-	link.download = `${Date.now()}.jpg` //current date as link download value
-	link.href = canvas.toDataURL() //toDataURL:data url of img. canvasData=href
-	link.click() //clicking link to download image
+	openMainModal("download")
 })
 saveCanvas.addEventListener("mouseup", () => {
 	saveCanvas.classList.remove("clicked")

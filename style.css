@@ -4,7 +4,9 @@
   --clr-gray100: #f5f5f5;
   /* same as inverted imgs */
   --clr-gray200: #737373;
-  --clr-gray500: #383939;
+  --clr-gray500: #575858;
+
+  --clr-gray-bg: #e0e1e1;
 
   --sidebar-width: 90px;
 }
@@ -18,11 +20,6 @@
 * {
   margin: 0;
   padding: 0;
-}
-
-input,
-button,
-span {
   font: inherit;
 }
 
@@ -46,6 +43,84 @@ li {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+#main-modal {
+  display: none;
+  color: var(--clr-gray500);
+  position: absolute;
+  top: 40%;
+  left: 40%;
+  z-index: 1000;
+}
+
+#main-modal button {
+  font-size: 13px;
+  padding: 2px 0 6px;
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--clr-gray-bg);
+  width: 350px;
+  min-height: 220px;
+  padding: 0 0 30px 0;
+  border-top: 5px solid #f9f7f7;
+  border-left: 5px solid #f9f7f7;
+  border-right: 5px solid #abaaaa;
+  border-bottom: 5px solid #abaaaa;
+}
+
+.modal-content .warning {
+  width: 100%;
+  margin-bottom: auto;
+  padding: 4px 10px 0;
+  background: rgba(183, 184, 233, 1.0);
+  background: linear-gradient(135deg, rgba(183, 184, 233, 1.0), rgba(89, 77, 102, 1.0));
+}
+
+.modal-content .warning img {
+  width: 30px;
+  height: 30px;
+  filter: invert(100%);
+}
+
+.modal-content #title {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.modal-content #prompt {
+  font-size: 14px;
+  width: 80%;
+  text-align: center;
+}
+
+.modal-content .btns {
+  width: 80%;
+  margin-top: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+}
+
+#shapes-modal {
+  display: none;
+  position: absolute;
+  z-index: 1000;
+  transition: left 0.3s ease-in-out;
+  background-color: #e0e1e1;
+  box-shadow: 0px 7px 14px rgba(0, 0, 0, .08),
+    0px 0px 3.12708px rgba(0, 0, 0, .0798),
+    0px 0px .931014px rgba(0, 0, 0, .1702);
+}
+
+#shapes-modal ul {
+  display: flex;
 }
 
 #canvas {
@@ -270,6 +345,7 @@ li {
   flex-direction: column;
 }
 
+#main-modal button,
 #bottom-options button {
   width: 100%;
   cursor: pointer;
@@ -284,6 +360,7 @@ li {
     0px 0px .931014px rgba(0, 0, 0, .1702);
 }
 
+#main-modal button:hover,
 #bottom-options button:is(.clicked, .active) {
   border-top: 3px solid #abaaaa;
   border-left: 3px solid #abaaaa;
