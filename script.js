@@ -1,357 +1,282 @@
-const body = document.body
-const canvas = document.querySelector("#canvas")
-const ctx = canvas.getContext("2d")
-const sidebar = document.getElementById("sidebar")
-const sidebarIcon = document.getElementById("sidebar-icon")
-const modal = document.getElementById("shapes-modal")
-const tools = document.querySelectorAll(".tools li.tool:not(.width):not(.fill)")
-const shapeTool = document.getElementById(".tools #shapes")
-const shapes = document.querySelectorAll(".shape")
-const colorPicker = document.querySelector("#s-color-picker")
-const colorOptions = document.querySelectorAll(".colors .color")
-const colorPalette1 = document.querySelectorAll(".col-1 .color:not(#rainbow)")
-const colorPalette2 = document.querySelectorAll(".col-2 .color:not(#black)")
-const colorPalette3 = document.querySelectorAll(".col-3 .color:not(#white)")
-const colorViewer = document.querySelector("#color-viewer")
-const lineWidthOptions = document.querySelectorAll("#line-width-options .width")
-const colorFillOptions = document.querySelectorAll("#color-fill .fill")
-const darkModeBtns = document.querySelectorAll(".dark-mode button")
-const redoUndoBtns = document.querySelectorAll(".redo-undo button")
-const clearCanvas = document.querySelector(".clear-btn")
-const saveCanvas = document.querySelector(".save-btn")
+import History from "./command/History.js"
+import BrushOrEraser from "./element/elements/BrushOrEraser.js"
+import Line from "./element/elements/Line.js"
+import Square from "./element/elements/Square.js"
+import Circle from "./element/elements/Circle.js"
+import Triangle from "./element/elements/Triangle.js"
 
-let startX, startY //mousedown x1,y1
-let isDrawing = false
-let sidebarOpen = true
-let fillColor = false
-let shapesModalOpen = false
-let darkmode
-let selectedTool
-let selectedColor
-let selectedWidth
-let snapshot
+import { showNotification } from "./utils/notification.js"
+import { openMainModal } from "./utils/mainModal.js"
+import { showTextModal } from "./utils/textModal.js"
+import { DrawCommand, UpdateCommand } from "./command/Command.js"
+import {
+	populateColorOptions,
+	getSelectedColor,
+	getBodyColor,
+} from "./utils/colors.js"
+import {
+	cursorForPosition,
+	getElementAndPosition,
+} from "./utils/coordinates.js"
+import {
+	adjustSidebarWidth,
+	getLineWidth,
+	colorFill,
+	initSidebar,
+	initTools,
+	getSelectedTool,
+	resetTool,
+} from "./utils/sidebar.js"
 
-window.addEventListener("load", () => {
+let canvas, ctx
+let mouseX, mouseY
+let action = "none"
+let elements = []
+let selectedElement = null
+let highlightedElement = null
+let currentCommand = null
+let history = new History()
+
+document.addEventListener("DOMContentLoaded", () => {
+	canvas = document.getElementById("canvas")
+	ctx = canvas.getContext("2d")
 	canvas.width = window.innerWidth
 	canvas.height = window.innerHeight
+
+	initSidebar()
+	adjustSidebarWidth()
+	initTools()
+	populateColorOptions()
+	addCanvasEvents()
+
+	window.addEventListener("resize", adjustSidebarWidth)
 })
 
-function openMainModal(action) {
-	const mainModal = document.getElementById("main-modal")
-	const modalTitle = mainModal.querySelector("#title")
-	const modalPrompt = mainModal.querySelector("#prompt")
-	const modalGoBtn = mainModal.querySelector("#go")
-	const modalCancelBtn = mainModal.querySelector("#cancel")
-	let canvasData //store canvas img data before clearing it
+function addCanvasEvents() {
+	canvas.addEventListener("mousedown", handleMouseDown)
+	canvas.addEventListener("mousemove", handleMouseMove)
+	canvas.addEventListener("mouseup", handleMouseUp)
+}
 
-	modalGoBtn.addEventListener("click", () => {
-		if (action === "reset") {
-			ctx.clearRect(0, 0, canvas.width, canvas.height)
-		} else if (action === "download") {
-			const link = document.createElement("a")
-			link.download = `${Date.now()}.jpg` //current date as link download value
-			link.href = canvasData //canvas.toDataURL()
-			link.click() //simulate the click on link to trigger download
+function redrawCanvas() {
+	ctx.clearRect(0, 0, canvas.width, canvas.height)
+	elements.forEach((element) => {
+		const isHighlighted = element === highlightedElement
+		element.draw(ctx, isHighlighted)
+	})
+}
+
+function handleMouseDown(e) {
+	mouseX = e.offsetX
+	mouseY = e.offsetY
+	let color = getSelectedColor()
+	let width = getLineWidth()
+	let tool = getSelectedTool()
+	let fill = colorFill()
+	let element
+	const id = elements.length
+
+	if (tool === "select") {
+		const elementAndPosition = getElementAndPosition(mouseX, mouseY, elements)
+
+		if (elementAndPosition) {
+			selectedElement = elementAndPosition.element
+			selectedElement.position = elementAndPosition.position
+		} else {
+			highlightedElement = null
+			selectedElement = null
+			redrawCanvas()
 		}
-		mainModal.style.display = "none"
-	})
 
-	modalCancelBtn.addEventListener("click", () => {
-		mainModal.style.display = "none"
-	})
+		if (selectedElement) {
+			//capture initial state before any manipulations
+			if (selectedElement.type === "brush") {
+				currentCommand = new UpdateCommand(selectedElement, {
+					points: [...selectedElement.points],
+				})
+			} else {
+				currentCommand = new UpdateCommand(selectedElement, {
+					...selectedElement,
+				})
+			}
+			//adding offset props to use for moving so elem wont jump right to the mouse pos
+			selectedElement.mouseOffsetX = mouseX - selectedElement.start.x
+			selectedElement.mouseOffsetY = mouseY - selectedElement.start.y
+			selectedElement.position === "inside"
+				? (action = "moving")
+				: (action = "resizing")
+		}
+	} else if (tool === "text") {
+		showTextModal(
+			() => ({ x: mouseX, y: mouseY, id: elements.length, color }),
+			ctx,
+			(textElement) => {
+				if (textElement) {
+					currentCommand = new DrawCommand(elements, textElement)
+					currentCommand.execute()
+					selectedElement = textElement
+					action = "typing"
+				}
+			}
+		)
+	} else {
+		switch (tool) {
+			case "brush":
+				element = new BrushOrEraser(id, mouseX, mouseY, color, width)
+				break
+			case "eraser":
+				element = new BrushOrEraser(id, mouseX, mouseY, getBodyColor(), width)
+				break
+			case "line":
+				element = new Line(id, mouseX, mouseY, color, width)
+				break
+			case "square":
+				element = new Square(id, mouseX, mouseY, color, fill, width)
+				break
+			case "circle":
+				element = new Circle(id, mouseX, mouseY, color, fill, width)
+				break
+			case "triangle":
+				element = new Triangle(id, mouseX, mouseY, color, fill, width)
+				break
+			default:
+				console.log("Unknown tool: ", tool)
+				break
+		}
+		currentCommand = new DrawCommand(elements, element) //add element to elements
+		currentCommand.execute() //execute new draw command
+		selectedElement = element
+		action = "drawing"
+	}
+}
+
+function handleMouseMove(e) {
+	mouseX = e.offsetX
+	mouseY = e.offsetY
+
+	if (getSelectedTool() === "select") {
+		const elementAndPosition = getElementAndPosition(mouseX, mouseY, elements)
+		e.target.style.cursor = elementAndPosition
+			? cursorForPosition(elementAndPosition.position)
+			: "default"
+	}
+
+	if (!selectedElement) return
+
+	if (action === "drawing") {
+		switch (selectedElement.type) {
+			case "brush":
+				selectedElement.addPoint(mouseX, mouseY)
+				break
+			case "line":
+			case "square":
+			case "circle":
+			case "triangle":
+				selectedElement.end = { x: mouseX, y: mouseY } //update only end props
+				break
+			default:
+				break
+		}
+	} else if (action === "moving") {
+		let newX1, newY1
+		newX1 = mouseX - selectedElement.mouseOffsetX //so el wont jump right to mouse pos
+		newY1 = mouseY - selectedElement.mouseOffsetY
+
+		switch (selectedElement.type) {
+			case "brush": //update all points
+				selectedElement.points = selectedElement.points.map((point) => ({
+					x: point.x + newX1 - selectedElement.start.x,
+					y: point.y + newY1 - selectedElement.start.y,
+				}))
+				selectedElement.update(newX1, newY1, newX1, newY1)
+				break
+			case "line":
+			case "square":
+			case "circle":
+			case "triangle":
+			case "text":
+				const width = selectedElement.end.x - selectedElement.start.x
+				const height = selectedElement.end.y - selectedElement.start.y
+				selectedElement.update(newX1, newY1, newX1 + width, newY1 + height)
+				break
+			default:
+				console.log("cant move element:", selectedElement.type)
+				break
+		}
+	} else if (action === "resizing") {
+		selectedElement.resizeCoordinates(mouseX, mouseY)
+	}
+	redrawCanvas()
+}
+
+function handleMouseUp() {
+	if (!selectedElement) return
 
 	switch (action) {
-		case "reset":
-			modalTitle.textContent = "Clear Canvas"
-			modalPrompt.textContent =
-				"Are you sure you want to reset the whole canvas? This can't be undone"
+		case "moving":
+		case "resizing":
+			//execute any update command on queue to update element w their final state
+			if (currentCommand) {
+				if (selectedElement.type === "brush") {
+					currentCommand.newProps = {
+						points: [...selectedElement.points],
+						boundingBox: { ...selectedElement.boundingBox },
+					}
+				} else {
+					currentCommand.newProps = { ...selectedElement }
+				}
+				currentCommand.execute()
+				history.executeCommand(currentCommand) //add command to history
+			}
 			break
-		case "download":
-			modalTitle.textContent = "Download"
-			modalPrompt.textContent =
-				"Save canvas as it is and download as image? (.jpg)"
-			canvasData = canvas.toDataURL() //toDataURL:data url of img. canvasData=href
+		case "drawing":
+		case "typing":
+			if (currentCommand) {
+				history.executeCommand(currentCommand)
+			}
 			break
 	}
 
-	mainModal.style.display = "block"
+	highlightedElement = selectedElement
+	// highlightedElement =
+	// 	selectedElement.type === "eraser" ? null : selectedElement
+	selectedElement = null
+	action = "none"
+	resetTool()
+	redrawCanvas()
 }
 
-//for filling shapes when active
-function fillShape() {
-	shapes.forEach((shape) => {
-		const shapeImg = shape.querySelector("img")
-		shape.classList.contains("active")
-			? (shapeImg.src = `assets/${shape.id}` + "Filled.svg")
-			: (shapeImg.src = `assets/${shape.id}` + ".svg")
-	})
-}
-
-//for eraser tool
-function getBodyColor() {
-	const computedStyle = getComputedStyle(body)
-	let bodyColor = computedStyle.backgroundColor
-	return bodyColor
-}
-
-const drawBox = (e) => {
-	if (!fillColor) {
-		return ctx.strokeRect(
-			e.offsetX,
-			e.offsetY,
-			startX - e.offsetX,
-			startY - e.offsetY
-		)
-	}
-	ctx.fillRect(e.offsetX, e.offsetY, startX - e.offsetX, startY - e.offsetY)
-}
-
-const drawCircle = (e) => {
-	ctx.beginPath()
-	//radius of circle according to mouse pointer
-	let radius = Math.sqrt(
-		Math.pow(startX - e.offsetX, 2) + Math.pow(startY - e.offsetY, 2)
-	)
-	//x1, y1, radius, start & end angle
-	ctx.arc(startX, startY, radius, 0, 2 * Math.PI)
-	!fillColor ? ctx.stroke() : ctx.fill()
-}
-
-const drawTriangle = (e) => {
-	ctx.beginPath()
-	ctx.moveTo(startX, startY)
-	ctx.lineTo(e.offsetX, e.offsetY)
-	ctx.lineTo(startX * 2 - e.offsetX, e.offsetY) //tri's bottom line
-	ctx.closePath() //auto draw 3rd line, closing the tri
-	!fillColor ? ctx.stroke() : ctx.fill()
-}
-
-const drawLine = (e) => {
-	ctx.beginPath()
-	ctx.moveTo(startX, startY)
-	ctx.lineTo(e.offsetX, e.offsetY)
-	ctx.stroke()
-}
-
-const startDraw = (e) => {
-	isDrawing = true
-	startX = e.offsetX //passing current mouseX/Y pos as startX/Y values
-	startY = e.offsetY
-	ctx.beginPath()
-	ctx.strokeStyle = selectedColor
-	ctx.fillStyle = selectedColor
-	ctx.lineWidth = selectedWidth
-	//copy canvas data into snapshot to stop weird dragging while drawing
-	snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height)
-}
-
-const drawing = (e) => {
-	if (!isDrawing) return
-	ctx.putImageData(snapshot, 0, 0) //adding copied canvas data onto this canvas
-
-	switch (selectedTool) {
-		case "pencil":
-		case "eraser":
-			ctx.strokeStyle =
-				selectedTool === "eraser" ? getBodyColor() : selectedColor
-			ctx.lineTo(e.offsetX, e.offsetY) //creating line according to mouse pointer
-			ctx.stroke() //drawing/filling line with color
-			break
-		case "line":
-			drawLine(e)
-			break
-		case "square":
-			drawBox(e)
-			break
-		case "circle":
-			drawCircle(e)
-			break
-		case "triangle":
-			drawTriangle(e)
-			break
-		// default:
-		// 	drawTriangle(e)
+function undoAction() {
+	if (history.undo()) {
+		highlightedElement = null
+		redrawCanvas()
 	}
 }
 
-function shapeOptionsModal(tool, e) {
-	if (!shapesModalOpen) {
-		modal.style.display = "block"
-		modal.style.left = e.clientX + 25 + "px"
-		modal.style.top = e.clientY + "px"
-	} else {
-		modal.style.display = "none"
+function redoAction() {
+	if (history.redo()) {
+		highlightedElement = null
+		redrawCanvas()
 	}
 }
-
-tools.forEach((tool) => {
-	tool.addEventListener("click", (e) => {
-		document.querySelector(".tools .active").classList.remove("active")
-
-		tool.id === "shapes" &&
-			(shapeOptionsModal(tool, e), (shapesModalOpen = true))
-
-		tool.classList.add("active")
-		selectedTool = tool.id
-		console.log(selectedTool)
-		fillShape()
-	})
-})
-
-//toggle sidebar
-sidebarIcon.addEventListener("click", () => {
-	if (sidebarOpen) {
-		sidebar.style.left = "-90px"
-		sidebarIcon.style.transform = "rotate(0deg)"
-		sidebarOpen = false
-	} else {
-		sidebar.style.left = "0"
-		sidebarIcon.style.transform = "rotate(180deg)"
-		sidebarOpen = true
-	}
-})
-
-//change line width
-lineWidthOptions.forEach((width) => {
-	width.addEventListener("click", () => {
-		document
-			.querySelector("#line-width-options .selected")
-			.classList.remove("selected")
-		width.classList.add("selected")
-		selectedWidth = parseFloat(width.getAttribute("data-line-width"))
-		console.log(selectedWidth)
-	})
-})
-
-//color fill
-colorFillOptions.forEach((option) => {
-	option.addEventListener("click", () => {
-		document.querySelector("#color-fill .selected").classList.remove("selected")
-		option.classList.add("selected")
-		fillColor = option.id === "fill" ? true : false
-		console.log("fill color?" + " " + fillColor)
-	})
-})
-
-//color palettes
-colorPalette1.forEach((icon, i) => {
-	const col1_colors = [
-		"#831A0C",
-		"#2C4F9A",
-		"#065b26",
-		"#ECEA7A",
-		"#b8591d",
-		"#983572",
-		"#603E83",
-		"#543623",
-		"#474747",
-	]
-	const color = col1_colors[i]
-	icon.style.backgroundColor = color
-})
-colorPalette2.forEach((icon, i) => {
-	const col2_colors = [
-		"#954545",
-		"#617BB3",
-		"#4A8560",
-		"#F1EF9B",
-		"#D37D47",
-		"#C171A3",
-		"#82669F",
-		"#7A5E4B",
-		"#8F8E8E",
-	]
-	const color = col2_colors[i]
-	icon.style.backgroundColor = color
-})
-colorPalette3.forEach((icon, i) => {
-	const col3_colors = [
-		"#C57D7D",
-		"#7587BC",
-		"#A5C2B0",
-		"#EFEDB2",
-		"#E4AE8C",
-		"#DEB0CC",
-		"#A692BA",
-		"#937B6C",
-		"#C7C7C7",
-	]
-	const color = col3_colors[i]
-	icon.style.backgroundColor = color
-})
-
-//change color
-colorOptions.forEach((color) => {
-	color.addEventListener("click", () => {
-		document.querySelector(".colors .selected").classList.remove("selected")
-		color.classList.add("selected")
-		selectedColor = window
-			.getComputedStyle(color)
-			.getPropertyValue("background-color")
-		colorViewer.style.backgroundColor = selectedColor
-		console.log(selectedColor)
-	})
-})
-
-//color picker
-colorPicker.addEventListener("change", () => {
-	// passing picked color value from color picker to last color btn bg
-	colorPicker.parentElement.style.background = colorPicker.value
-	colorPicker.parentElement.click()
-	colorViewer.style.backgroundColor = colorPicker.value
-})
-
-//dark mode
-darkModeBtns.forEach((btn) => {
-	btn.addEventListener("click", () => {
-		document.querySelector(".dark-mode .active").classList.remove("active")
-		btn.classList.add("active")
-		body.style.backgroundColor = btn.id === "off" ? "#D3D8DB" : "#3E3E3F"
-		getBodyColor()
-	})
-})
 
 //redo & undo
+const redoUndoBtns = document.querySelectorAll(".redo-undo button")
 redoUndoBtns.forEach((btn) => {
-	btn.addEventListener("mousedown", () => {
-		btn.classList.add("clicked")
-		console.log(`clicked down: ${btn.id} btn`)
-	})
-
 	btn.addEventListener("click", () => {
-		console.log(`~${btn.id} changes~`)
-	})
-
-	btn.addEventListener("mouseup", () => {
-		btn.classList.remove("clicked")
-		console.log(`un clicked: ${btn.id} btn`)
+		showNotification(`${btn.id} changes`)
+		btn.id === "undo" ? undoAction() : redoAction()
 	})
 })
 
 //clear canvas
-clearCanvas.addEventListener("mousedown", () => {
-	clearCanvas.classList.add("clicked")
-	console.log("clicked down")
-})
+const clearCanvas = document.querySelector(".clear-btn")
 clearCanvas.addEventListener("click", () => {
-	openMainModal("reset")
-})
-clearCanvas.addEventListener("mouseup", () => {
-	clearCanvas.classList.remove("clicked")
-	console.log("un clicked")
+	openMainModal("reset", ctx, canvas)
 })
 
 //save canvas
-saveCanvas.addEventListener("mousedown", () => {
-	saveCanvas.classList.add("clicked")
-})
+const saveCanvas = document.querySelector(".save-btn")
 saveCanvas.addEventListener("click", () => {
-	openMainModal("download")
+	openMainModal("download", ctx, canvas)
 })
-saveCanvas.addEventListener("mouseup", () => {
-	saveCanvas.classList.remove("clicked")
-})
-
-canvas.addEventListener("mousedown", startDraw)
-canvas.addEventListener("mousemove", drawing)
-canvas.addEventListener("mouseup", () => (isDrawing = false))

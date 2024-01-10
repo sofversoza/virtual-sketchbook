@@ -4,15 +4,51 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Virtual Sketchbook</title>
+		<!-- STYLESHEET -->
 		<link rel="stylesheet" href="style.css" />
-		<script src="script.js" defer></script>
+		<!-- FONTAWESOME ICONS -->
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"
+		/>
+		<!-- GOOGLE ICONS -->
+		<link
+			rel="stylesheet"
+			href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0"
+		/>
+		<!-- SCRIPT -->
+		<script type="module" src="script.js" defer></script>
 	</head>
 	<body>
 		<main id="app-container">
+			<div id="textModal">
+				<div id="text-options">
+					<select id="font-name" class="adv-option-btn"></select>
+					<select id="font-size" class="adv-option-btn"></select>
+					<button id="bold" class="option-btn format">
+						<i class="fa-solid fa-bold"></i>
+					</button>
+					<button id="italic" class="option-btn format">
+						<i class="fa-solid fa-italic"></i>
+					</button>
+					<button id="underline" class="option-btn format">
+						<i class="fa-solid fa-underline"></i>
+					</button>
+				</div>
+
+				<textarea id="text-area" name="" cols="30" rows="1"></textarea>
+			</div>
+
 			<div id="main-modal">
 				<div class="modal-content">
 					<div class="warning">
-						<img src="assets/warning.svg" alt="warning icon" />
+						<img src="assets/warning2.svg" alt="warning icon" />
+						<img
+							src="assets/close.svg"
+							alt="close icon"
+							id="exit-icon"
+							title="exit"
+						/>
 					</div>
 					<h2 id="title"></h2>
 					<p id="prompt"></p>
@@ -23,8 +59,6 @@
 				</div>
 			</div>
 
-			<!-- #tool-modal -->
-
 			<section>
 				<div id="sidebar">
 					<div id="toggle-sidebar">
@@ -32,36 +66,29 @@
 							src="assets/toggleicon.svg"
 							alt="icon for sidebar toggle"
 							id="sidebar-icon"
+							title="toggle sidebar"
 						/>
 					</div>
 
 					<div class="sidebar-wrapper">
+						<span class="title">tools</span>
 						<div id="tool-options">
 							<div class="col-1">
 								<ul class="tools">
-									<li class="tool active" id="pointer">
-										<img
-											src="assets/pointer.svg"
-											alt="pointer tool"
-											title="pointer"
-										/>
+									<li class="tool active" id="select">
+										<span class="material-symbols-outlined" title="select">
+											arrow_selector_tool
+										</span>
 									</li>
-									<li class="tool" id="pencil">
-										<img
-											src="assets/pencil.svg"
-											alt="pencil tool"
-											title="pencil"
-										/>
+									<li class="tool" id="brush">
+										<span class="material-symbols-outlined" title="brush">
+											gesture
+										</span>
 									</li>
 									<li class="tool" id="text">
-										<img src="assets/text.svg" alt="text tool" title="text" />
-									</li>
-									<li class="tool" id="stamp">
-										<img
-											src="assets/stamp.svg"
-											alt="stamp tool"
-											title="stamp"
-										/>
+										<span class="material-symbols-outlined" title="text">
+											text_fields
+										</span>
 									</li>
 								</ul>
 							</div>
@@ -69,101 +96,85 @@
 							<div class="col-2">
 								<ul class="tools">
 									<li class="tool" id="eraser">
-										<img
-											src="assets/eraser.svg"
-											alt="eraser tool"
-											title="eraser"
-										/>
-									</li>
-									<li class="tool" id="brush">
-										<img
-											src="assets/brush.svg"
-											alt="brush tool"
-											title="brush"
-										/>
+										<span class="material-symbols-outlined" title="eraser">
+											ink_eraser
+										</span>
 									</li>
 									<li class="tool" id="line">
-										<img src="assets/line.svg" alt="line tool" title="line" />
+										<span class="material-symbols-outlined" title="line">
+											line_start
+										</span>
 									</li>
 									<li class="tool" id="shapes">
-										<img
-											src="assets/shapes.svg"
-											alt="shapes tool"
-											title="shapes"
-										/>
+										<span class="material-symbols-outlined" title="shapes">
+											interests
+										</span>
 									</li>
-									<div id="shapes-modal">
-										<ul class="shapes">
-											<li class="tool shape" id="square">
-												<img src="assets/square.svg" alt="square tool" />
-											</li>
-											<li class="tool shape" id="circle">
-												<img src="assets/circle.svg" alt="circle tool" />
-											</li>
-											<li class="tool shape" id="triangle">
-												<img src="assets/triangle.svg" alt="triangle tool" />
-											</li>
-										</ul>
-									</div>
 								</ul>
 							</div>
 						</div>
 
+						<div id="tool-options-viewer" title="tool options viewer">
+							<div class="container"></div>
+						</div>
+
+						<span class="title">line width</span>
 						<div id="line-width-options">
 							<ul class="widths">
-								<li class="tool width selected" id="pen-sz" data-line-width="1">
-									<img
-										src="assets/pen-sz-1.svg"
-										alt="line width"
-										title="line width"
-									/>
+								<li class="tool width selected" id="pen-sz" data-width="1">
+									<span
+										class="material-symbols-outlined"
+										title="line width: extra thin"
+									>
+										pen_size_1
+									</span>
 								</li>
-								<li class="tool width" id="pen-sz" data-line-width="5">
-									<img
-										src="assets/pen-sz-3.svg"
-										alt="line width"
-										title="line width"
-									/>
+								<li class="tool width" id="pen-sz" data-width="5">
+									<span
+										class="material-symbols-outlined"
+										title="line width: thin"
+									>
+										pen_size_3
+									</span>
 								</li>
 							</ul>
 							<ul class="widths">
-								<li class="tool width" id="pen-sz" data-line-width="8">
-									<img
-										src="assets/pen-sz-4.svg"
-										alt="line width"
-										title="line width"
-									/>
+								<li class="tool width" id="pen-sz" data-width="8">
+									<span
+										class="material-symbols-outlined"
+										title="line width: medium"
+									>
+										pen_size_4
+									</span>
 								</li>
-								<li class="tool width" id="pen-sz" data-line-width="15">
-									<img
-										src="assets/pen-sz-5.svg"
-										alt="line width"
-										title="line width"
-									/>
+								<li class="tool width" id="pen-sz" data-width="15">
+									<span
+										class="material-symbols-outlined"
+										title="line width: thick"
+									>
+										pen_size_5
+									</span>
 								</li>
 							</ul>
 						</div>
 
+						<span class="title">color fill</span>
 						<div id="color-fill">
 							<ul class="options">
 								<li class="tool fill selected" id="no-fill">
-									<img
-										src="assets/nofill.svg"
-										alt="fill color"
-										title="no fill color"
-									/>
+									<span class="material-symbols-outlined" title="no fill">
+										invert_colors_off
+									</span>
 								</li>
 								<li class="tool fill" id="fill">
-									<img
-										src="assets/fill.svg"
-										alt="fill color"
-										title="fill color"
-									/>
+									<span class="material-symbols-outlined" title="fill color">
+										invert_colors
+									</span>
 								</li>
 							</ul>
 						</div>
 
-						<div id="color-viewer" title="selected color"></div>
+						<div id="color-viewer" title="color viewer"></div>
 
 						<div id="color-options">
 							<div class="col-1">
@@ -171,82 +182,43 @@
 									<li class="color" id="rainbow">
 										<input type="color" id="s-color-picker" value="#FFFFFF" />
 									</li>
-									<li class="color"></li>
-									<li class="color"></li>
-									<li class="color"></li>
-									<li class="color"></li>
-									<li class="color"></li>
-									<li class="color"></li>
-									<li class="color"></li>
-									<li class="color"></li>
-									<li class="color"></li>
 								</ul>
 							</div>
 
 							<div class="col-2">
-								<ul class="colors">
-									<li class="color selected" id="black"></li>
-
-									<li class="color"></li>
-									<li class="color"></li>
-									<li class="color"></li>
-									<li class="color"></li>
-									<li class="color"></li>
-									<li class="color"></li>
-									<li class="color"></li>
-									<li class="color"></li>
-									<li class="color"></li>
-								</ul>
+								<ul class="colors"></ul>
 							</div>
 
 							<div class="col-3">
-								<ul class="colors">
-									<li class="color" id="white"></li>
-									<li class="color"></li>
-									<li class="color"></li>
-									<li class="color"></li>
-									<li class="color"></li>
-									<li class="color"></li>
-									<li class="color"></li>
-									<li class="color"></li>
-									<li class="color"></li>
-									<li class="color"></li>
-								</ul>
+								<ul class="colors"></ul>
 							</div>
 						</div>
 
 						<div id="bottom-options">
+							<span class="title">dark mode</span>
 							<div class="dark-mode">
 								<button class="active" id="on">
-									<img
-										src="assets/dark_mode_on.svg"
-										alt="dark mode on button"
-										title="dark mode on"
-									/>
+									<span class="material-symbols-outlined" title="dark mode on">
+										dark_mode
+									</span>
 								</button>
 								<button id="off">
-									<img
-										src="assets/dark_mode_off.svg"
-										alt="dark mode off button"
-										title="dark mode off"
-									/>
+									<span class="material-symbols-outlined" title="dark mode off">
+										bedtime_off
+									</span>
 								</button>
 							</div>
 
 							<div class="redo-undo">
 								<button id="undo">
-									<img
-										src="assets/undo.svg"
-										alt="undo button"
-										title="undo changes"
-									/>
+									<span class="material-symbols-outlined" title="undo changes">
+										undo
+									</span>
 								</button>
 								<button id="redo">
-									<img
-										src="assets/redo.svg"
-										alt="redo button"
-										title="redo changes"
-									/>
+									<span class="material-symbols-outlined" title="redo changes">
+										redo
+									</span>
 								</button>
 							</div>
 
