@@ -1,12 +1,12 @@
 {
   "name": "virtual-sketchbook",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "A web-based virtual sketchbook built with HTML Canvas & JavaScript Module",
+  "main": "script.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "keywords": ["HTML canvas", "canvas web-app", "drawing"],
+  "author": "Sofia Versoza",
+  "license": "ISC",
+  "repository": "https://github.com/sofversoza/virtual-sketchbook"
 }
