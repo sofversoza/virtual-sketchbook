@@ -1,4 +1,5 @@
 import Text from "../element/elements/Text.js"
+
 const textModal = document.getElementById("textModal")
 const textArea = document.getElementById("text-area")
 const fontNameSelect = document.getElementById("font-name")
@@ -40,6 +41,7 @@ export function showTextModal(getXYandID, ctx, callback) {
 	textModal.addEventListener(
 		"blur",
 		(e) => {
+			//relatedTarget is the element that triggered the event
 			if (!e.relatedTarget || !textModal.contains(e.relatedTarget)) {
 				handleBlur(getXYandID, ctx, callback) //clicked outside the modal
 				currentStyle.color = color
@@ -62,6 +64,7 @@ export function hideTextModal() {
 	textModal.style.display = "none"
 	fontNameSelect.value = currentStyle.font
 	fontSizeSelect.value = currentStyle.fontSize
+
 	textModal.removeEventListener("blur", handleBlur)
 	textModal.querySelector(".active-style")?.classList.remove("active-style")
 	updateTextAreaStyle()
@@ -74,7 +77,7 @@ function handleBlur(getXYandID, ctx, callback) {
 	if (!text) return
 
 	ctx.font = `${currentStyle.fontWeight} ${currentStyle.fontStyle} ${currentStyle.fontSize}px ${currentStyle.font}`
-	const textWidth = ctx.measureText(text).width
+
 	const dummyDiv = document.createElement("div") //hidden div to measure text's height
 	dummyDiv.style.position = "absolute"
 	dummyDiv.style.visibility = "hidden"
@@ -82,6 +85,8 @@ function handleBlur(getXYandID, ctx, callback) {
 	dummyDiv.style.whiteSpace = "nowrap"
 	dummyDiv.textContent = text
 	document.body.appendChild(dummyDiv)
+
+	const textWidth = ctx.measureText(text).width
 	const textHeight = dummyDiv.offsetHeight //set text's height to div's height
 	document.body.removeChild(dummyDiv)
 
@@ -102,6 +107,7 @@ function handleBlur(getXYandID, ctx, callback) {
 
 	element.end = { x: x + textWidth, y: y + textHeight } //update end points
 	callback(element)
+	console.log("text element committed")
 	hideTextModal()
 }
 

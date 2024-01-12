@@ -1,0 +1,9 @@
+- Modify your existing event handlers to handle the touch event object. Touch events have a touches array, which contains information about all current touch points.
+- For example, e.touches[0].clientX and e.touches[0].clientY will give you the coordinates of the first touch point.
+- On touch devices, certain default behaviors (like scrolling or zooming) might interfere with your canvas drawing. Use e.preventDefault() within your touch event handlers to prevent these default actions.
+
+touches array -> how many touches are on the device
+targetTouches -> how many of them are within the target
+  - if the target is a btn, touches arr will only trigger for the btn
+changedTouches -> how many of them are changing each time the event is called
+  - for touchstart, only the new touch will be on this arr

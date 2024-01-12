@@ -56,6 +56,10 @@ function addCanvasEvents() {
 	canvas.addEventListener("mousedown", handleMouseDown)
 	canvas.addEventListener("mousemove", handleMouseMove)
 	canvas.addEventListener("mouseup", handleMouseUp)
+
+	canvas.addEventListener("touchstart", handleTouchStart)
+	canvas.addEventListener("touchmove", handleTouchMove)
+	canvas.addEventListener("touchend", handleTouchEnd)
 }
 
 function redrawCanvas() {
@@ -66,9 +70,41 @@ function redrawCanvas() {
 	})
 }
 
+function handleTouchStart(e) {
+	e.preventDefault() //prevent scrolling & zooming
+	// const touch = e.touches[0]
+	const touch = e.changedTouches[0]
+	handleDrawingStart(touch.clientX, touch.clientY)
+}
+
+function handleTouchMove(e) {
+	const touch = e.touches[0]
+	handleDrawingMove(touch.clientX, touch.clientY, null)
+}
+
+function handleTouchEnd(e) {
+	handleDrawingEnd()
+}
+
 function handleMouseDown(e) {
-	mouseX = e.offsetX
-	mouseY = e.offsetY
+	const x = e.clientX
+	const y = e.clientY
+	handleDrawingStart(x, y)
+}
+
+function handleMouseMove(e) {
+	const x = e.clientX
+	const y = e.clientY
+	handleDrawingMove(x, y, e)
+}
+
+function handleMouseUp() {
+	handleDrawingEnd()
+}
+
+function handleDrawingStart(x, y) {
+	mouseX = x
+	mouseY = y
 	let color = getSelectedColor()
 	let width = getLineWidth()
 	let tool = getSelectedTool()
@@ -150,11 +186,11 @@ function handleMouseDown(e) {
 	}
 }
 
-function handleMouseMove(e) {
-	mouseX = e.offsetX
-	mouseY = e.offsetY
+function handleDrawingMove(x, y, e) {
+	mouseX = x
+	mouseY = y
 
-	if (getSelectedTool() === "select") {
+	if (getSelectedTool() === "select" && e) {
 		const elementAndPosition = getElementAndPosition(mouseX, mouseY, elements)
 		e.target.style.cursor = elementAndPosition
 			? cursorForPosition(elementAndPosition.position)
@@ -175,6 +211,7 @@ function handleMouseMove(e) {
 				selectedElement.end = { x: mouseX, y: mouseY } //update only end props
 				break
 			default:
+				console.log("TEST")
 				break
 		}
 	} else if (action === "moving") {
@@ -209,7 +246,7 @@ function handleMouseMove(e) {
 	redrawCanvas()
 }
 
-function handleMouseUp() {
+function handleDrawingEnd() {
 	if (!selectedElement) return
 
 	switch (action) {
@@ -238,8 +275,6 @@ function handleMouseUp() {
 	}
 
 	highlightedElement = selectedElement
-	// highlightedElement =
-	// 	selectedElement.type === "eraser" ? null : selectedElement
 	selectedElement = null
 	action = "none"
 	resetTool()
